@@ -1,12 +1,12 @@
 version: '3.7'
 services:
     mongodb:
-        container_name: mongodb
+        ##container_name: mongodb
         image: mongo
         networks: 
             - network
     backend:
-        container_name: backend
+        ##container_name: backend
         build:
             context: ./backend
         ports:
@@ -18,15 +18,15 @@ services:
         depends_on:
             - "mongodb"
     frontend:
-        container_name: frontend
+        ##container_name: frontend
         build:
-            context: ./frontend-reducer
+            context: ./frontend
         ports:
             - "3000:3000"
         networks: 
             - network
         volumes: 
-            - ./frontend-reducer:/usr/src/app
+            - ./frontend:/usr/src/app
         depends_on:
             - "backend"
 networks: 

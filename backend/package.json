@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/loader.js",
   "scripts": {
-    "start" : "nodemon src/loader.js",
+    "start": "nodemon src/loader.js",
     "dev": "nodemon",
     "production": "pm2 start src/loader.js --name todo-app"
   },
@@ -14,7 +14,8 @@
   "dependencies": {
     "body-parser": "^1.19.0",
     "express": "^4.16.4",
-    "mongoose": "^5.5.5",
+    "lodash": "^4.17.15",
+    "mongoose": "^5.9.7",
     "node-restful": "^0.2.6",
     "pm2": "^3.5.0"
   },
