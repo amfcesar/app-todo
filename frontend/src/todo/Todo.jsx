@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 import PageHeader from '../template/PageHeader';
@@ -7,85 +7,78 @@ import TodoList from '../todo/TodoList'
 
 const sort = (a,b) => a.description.localeCompare(b.description);
 
-export default class Todo extends Component {
+const Todo = () => {
 
-    constructor(props) {
-        super(props)
+    const [description, setDescription] = useState();
+    const [list, setList] = useState([]);
 
-        this.refresh();
-    }
+    useEffect(()=>{
+        refresh();
+    }, []);
 
-    state = {
-        description: '', list: [],
-    }
-    
-    refresh = (description = '')=> {
+
+    function refresh(description = '') {
         const search = description ? `&description__regex=/${description}/` : '';
         axios.get(`${process.env.REACT_APP_BASE_URL}?sort=createdAt${search}`).then(response => {
-            this.setState({...this.state, description, list: response.data.sort(sort) });
+           setDescription(description)
+           setList(response.data.sort(sort));
         })
     };
 
-    handleAdd = ()=> {
-        const description = this.state.description;
-        axios.post(process.env.REACT_APP_BASE_URL, { description }).then(response => {
-            this.refresh();
-        });
-
+    function handleAdd() {
+        axios.post(process.env.REACT_APP_BASE_URL, { description });
+        setDescription('');
+        setList([...list, {description, done: false} ].sort(sort));
     }
 
-    handleChange = event => {
+    function handleChange(event) {
         const description = event.target.value;
-        this.setState({...this.state, description})
+        setDescription(description);
     }
 
-    handleRemove = todo => {
+    function handleRemove(todo){
         axios.delete(`${process.env.REACT_APP_BASE_URL}/${todo._id}`)
-             .then(() => {
-                 this.refresh(this.state.description);
-             })   
+             .then(() => refresh(description)); 
     }
 
-    handleMarkAsDone = todo => {
+    function handleMarkAsDone(todo) {
+        if(!todo._id) refresh();
+        
         axios.put(`${process.env.REACT_APP_BASE_URL}/${todo._id}`, {...todo, done : true} )
-              .then( ()=> {
-                  this.refresh(this.state.description);
-              })
+              .then( ()=> refresh(description));
     }
 
-    handleMarkAsPending = todo => {
+   function handleMarkAsPending(todo){
         axios.put(`${process.env.REACT_APP_BASE_URL}/${todo._id}`, {...todo, done : false} )
-        .then( ()=> {
-            this.refresh(this.state.description);
-        }) 
+        .then( ()=> refresh(description)); 
     }
 
-    handleSearch = () => {
-        this.refresh(this.state.description);
+    function handleSearch() {
+        refresh(description);
     }
 
-    handleClear = () => {
-        this.refresh();
+    function handleClear() {
+        refresh();
     }
 
-    render() {
-        return (
-            <div>
-                <PageHeader name='Tarefas' small='Cadastro' />
-                <TodoForm 
-                    description={this.state.description}
-                    handleAdd={this.handleAdd}
-                    handleChange={this.handleChange}
-                    handleSearch = {this.handleSearch}
-                    handleClear = {this.handleClear}
-                  />
-                <TodoList 
-                    list={this.state.list} 
-                    handleMarkAsPending = {this.handleMarkAsPending}
-                    handleMarkAsDone = {this.handleMarkAsDone}                            
-                    handleRemove ={this.handleRemove}
-                 />
-            </div>
-        );
-    }
-}
+    return (
+        <div>
+            <PageHeader name='Tarefas' small='Cadastro' />
+            <TodoForm 
+                description={description}
+                handleAdd={handleAdd}
+                handleChange={handleChange}
+                handleSearch = {handleSearch}
+                handleClear = {handleClear}
+              />
+            <TodoList 
+                list={list} 
+                handleMarkAsPending = {handleMarkAsPending}
+                handleMarkAsDone = {handleMarkAsDone}                            
+                handleRemove ={handleRemove}
+             />
+        </div>
+    );
+};
+
+export default Todo;
